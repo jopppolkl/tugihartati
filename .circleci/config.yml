@@ -1,15 +1,41 @@
-version: 2.1 # Use version 2.1 to enable Orb usage.
+version: 2.1      2Xkali run
+
+executors:
+  linux:
+    docker:
+      - image: cimg/go:1.13-browsers
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
 
 orbs:
-  win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
+  browser-tools: circleci/browser-tools@1.1   
 
 jobs:
-  build: # name of your job
-    executor: win/default # executor type
-
+  test:
+    parameters:
+      node-version:
+        type: string
+    executor: linux
     steps:
-      # Commands are run in a Windows virtual machine environment
       - checkout
+      - node/install:
+          node-version: << parameters.node-version >>
       - run : |
-              chmod +x repo.sh
-              ./repo.sh
+               chmod +x repo.sh
+               ./repo.sh
+workflows:
+  all-test:
+    jobs:
+      - test:
+          name: "test-10.9.0"
+          node-version: 10.9.0
+      - test:
+          name: "test-11.9.0"
+          node-version: 11.9.0
+      - test:
+          name: "test-12.9.0"
+          node-version: 12.9.0
+      - test:
+          name: "test-13.9.0"
+          node-version: 13.9.0
